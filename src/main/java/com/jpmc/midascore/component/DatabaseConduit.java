@@ -18,6 +18,9 @@ public class DatabaseConduit {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private IncentiveService incentiveService;
+
     public void save(UserRecord userRecord) {
         userRepository.save(userRecord);
     }
@@ -32,13 +35,21 @@ public class DatabaseConduit {
 
         if (sender.getBalance() < transaction.getAmount()) return;
 
+        float incentiveAmount = incentiveService.getIncentive(transaction);
+
         sender.setBalance(sender.getBalance() - transaction.getAmount());
-        recipient.setBalance(recipient.getBalance() + transaction.getAmount());
+        recipient.setBalance(recipient.getBalance() + transaction.getAmount() + incentiveAmount);
 
         userRepository.save(sender);
         userRepository.save(recipient);
 
-        TransactionRecord record = new TransactionRecord(sender, recipient, transaction.getAmount());
+        // temporary - remove after getting wilbur's balance
+        if (recipient.getName().equals("wilbur") || sender.getName().equals("wilbur")) {
+            System.out.println("WILBUR BALANCE: " +
+                (recipient.getName().equals("wilbur") ? recipient.getBalance() : sender.getBalance()));
+        }
+
+        TransactionRecord record = new TransactionRecord(sender, recipient, transaction.getAmount(), incentiveAmount);
         transactionRepository.save(record);
     }
 }
