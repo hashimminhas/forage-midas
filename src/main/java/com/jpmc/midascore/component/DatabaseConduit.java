@@ -43,12 +43,6 @@ public class DatabaseConduit {
         userRepository.save(sender);
         userRepository.save(recipient);
 
-        // temporary - remove after getting wilbur's balance
-        if (recipient.getName().equals("wilbur") || sender.getName().equals("wilbur")) {
-            System.out.println("WILBUR BALANCE: " +
-                (recipient.getName().equals("wilbur") ? recipient.getBalance() : sender.getBalance()));
-        }
-
         TransactionRecord record = new TransactionRecord(sender, recipient, transaction.getAmount(), incentiveAmount);
         transactionRepository.save(record);
     }
